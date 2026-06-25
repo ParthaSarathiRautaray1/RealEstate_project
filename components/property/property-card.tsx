@@ -34,7 +34,7 @@ export function PropertyCard({ property }: { property: Property }) {
               </div>
               <p className="flex shrink-0 items-center gap-1 text-sm font-medium"><Star className="h-4 w-4 fill-accent text-accent" />{rating ? rating.toFixed(1) : "New"}</p>
             </div>
-            <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3 text-xs text-muted-foreground">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5"><BedDouble className="h-4 w-4" />4 Beds</span>
               <span className="flex items-center gap-1.5"><Bath className="h-4 w-4" />3 Baths</span>
               <span className="font-medium text-primary transition-transform group-hover:translate-x-0.5">View →</span>

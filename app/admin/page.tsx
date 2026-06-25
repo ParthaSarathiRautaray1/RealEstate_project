@@ -17,8 +17,8 @@ export default async function AdminDashboardPage() {
   ] as const;
   return (
     <div>
-      <h1 className="font-serif text-4xl font-semibold">Dashboard</h1>
-      <div className="mt-6 grid gap-4 md:grid-cols-4">
+      <h1 className="font-serif text-3xl font-semibold sm:text-4xl">Dashboard</h1>
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map(([label, value, Icon]) => <Card key={label}><CardContent className="p-5"><Icon className="h-5 w-5 text-primary" /><p className="mt-4 text-3xl font-bold">{value}</p><p className="text-sm text-muted-foreground">{label}</p></CardContent></Card>)}
       </div>
     </div>

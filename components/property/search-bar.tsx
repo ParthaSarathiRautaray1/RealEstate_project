@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 
 export function SearchBar({ defaultQuery = "", defaultType = "" }: { defaultQuery?: string; defaultType?: string }) {
   return (
-    <form action="/properties" className="glass grid gap-3 rounded-lg p-3 md:grid-cols-[1fr_180px_160px]">
+    <form action="/properties" className="glass grid gap-3 rounded-lg p-3 sm:p-4 md:grid-cols-[minmax(0,1fr)_180px_160px]">
       <div className="relative">
         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
         <Input name="q" defaultValue={defaultQuery} placeholder="Search city, neighborhood, or property" className="pl-9" />

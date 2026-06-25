@@ -17,17 +17,17 @@ export default async function ReviewsPage() {
   const { data } = await supabaseAdmin.from("reviews").select("*, properties(title)").order("created_at", { ascending: false });
   return (
     <div>
-      <h1 className="font-serif text-4xl font-semibold">Reviews</h1>
+      <h1 className="font-serif text-3xl font-semibold sm:text-4xl">Reviews</h1>
       <div className="mt-6 grid gap-3">
         {data?.length ? (data as ReviewRow[]).map((review) => (
           <Card key={review.id}>
-            <CardContent className="flex items-center justify-between gap-4 p-4">
-              <div>
-                <p className="font-semibold">{review.user_name} · {"*".repeat(review.rating)}</p>
-                <p className="text-sm text-muted-foreground">{review.properties?.title} · {review.approved ? "Approved" : "Pending"}</p>
-                <p className="mt-2 text-sm">{review.review}</p>
+            <CardContent className="flex flex-col justify-between gap-4 p-4 sm:flex-row sm:items-center">
+              <div className="min-w-0">
+                <p className="safe-break font-semibold">{review.user_name} · {"*".repeat(review.rating)}</p>
+                <p className="safe-break text-sm text-muted-foreground">{review.properties?.title} · {review.approved ? "Approved" : "Pending"}</p>
+                <p className="safe-break mt-2 text-sm">{review.review}</p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex shrink-0 gap-2">
                 {!review.approved ? (
                   <ActionButton action={approveReview} id={review.id} variant="outline" size="icon" ariaLabel="Approve review">
                     <Check className="h-4 w-4" />

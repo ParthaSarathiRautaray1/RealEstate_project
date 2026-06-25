@@ -15,15 +15,15 @@ const links = [
 
 export function AdminNav() {
   return (
-    <aside className="border-r bg-card">
-      <div className="flex h-16 items-center justify-between border-b px-5">
-        <span className="font-serif text-xl font-semibold">Aurum Admin</span>
+    <aside className="sticky top-0 z-40 border-b bg-card md:static md:min-h-screen md:border-b-0 md:border-r">
+      <div className="flex h-16 items-center justify-between gap-3 border-b px-4 sm:px-5">
+        <span className="min-w-0 truncate font-serif text-lg font-semibold sm:text-xl">Aurum Admin</span>
         <ThemeToggle />
       </div>
-      <nav className="grid gap-1 p-3">
-        {links.map(([href, label, Icon]) => <Link key={href} href={href} className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"><Icon className="h-4 w-4" />{label}</Link>)}
+      <nav className="no-scrollbar flex gap-1 overflow-x-auto p-2 md:grid md:overflow-visible md:p-3">
+        {links.map(([href, label, Icon]) => <Link key={href} href={href} className="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground md:gap-3"><Icon className="h-4 w-4" />{label}</Link>)}
       </nav>
-      <form action={logoutAdmin} className="p-3"><Button variant="ghost" className="w-full justify-start"><LogOut className="h-4 w-4" />Sign out</Button></form>
+      <form action={logoutAdmin} className="hidden p-3 md:block"><Button variant="ghost" className="w-full justify-start"><LogOut className="h-4 w-4" />Sign out</Button></form>
     </aside>
   );
 }

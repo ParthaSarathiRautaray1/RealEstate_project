@@ -108,12 +108,12 @@ export function Gallery({ images, title }: { images: PropertyImage[]; title: str
           </>
         ) : null}
 
-        <span className="absolute right-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-xs font-medium text-white">{index + 1} / {count}</span>
+        <span className="absolute right-2 top-2 rounded-full bg-black/55 px-2.5 py-1 text-xs font-medium text-white sm:right-3 sm:top-3">{index + 1} / {count}</span>
         <button
           type="button"
           onClick={() => openAt(index)}
           aria-label="Open full screen"
-          className="absolute bottom-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-black/55 text-white transition hover:bg-black/75"
+          className="absolute bottom-2 right-2 grid h-9 w-9 place-items-center rounded-full bg-black/55 text-white transition hover:bg-black/75 sm:bottom-3 sm:right-3"
         >
           <Maximize2 className="h-4 w-4" />
         </button>
@@ -144,7 +144,7 @@ export function Gallery({ images, title }: { images: PropertyImage[]; title: str
             <Dialog.Title className="sr-only">{title} — photo gallery</Dialog.Title>
             <Dialog.Description className="sr-only">Swipe or use the arrow keys to browse photos. Press Escape or the close button to go back.</Dialog.Description>
 
-            <div className="flex items-center justify-between p-4 text-white">
+            <div className="flex items-center justify-between p-3 text-white sm:p-4">
               <span className="rounded-full bg-white/10 px-3 py-1 text-sm">{index + 1} / {count}</span>
               <Dialog.Close aria-label="Close gallery" className="grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20">
                 <X className="h-5 w-5" />
@@ -157,7 +157,7 @@ export function Gallery({ images, title }: { images: PropertyImage[]; title: str
               className="no-scrollbar flex flex-1 snap-x snap-mandatory overflow-x-auto"
             >
               {items.map((image) => (
-                <div key={image.id} className="grid w-full shrink-0 basis-full snap-start place-items-center p-4">
+                <div key={image.id} className="grid w-full shrink-0 basis-full snap-start place-items-center p-2 sm:p-4">
                   <Image src={image.url} alt={image.alt || title} width={1600} height={1066} sizes="100vw" className="max-h-[78vh] w-auto rounded-lg object-contain" />
                 </div>
               ))}
@@ -183,7 +183,7 @@ function SlideButton({ side, onClick, large }: { side: "left" | "right"; onClick
       type="button"
       onClick={onClick}
       aria-label={side === "left" ? "Previous photo" : "Next photo"}
-      className={`absolute top-1/2 z-10 grid -translate-y-1/2 place-items-center rounded-full bg-black/55 text-white transition hover:bg-black/75 ${large ? "h-12 w-12" : "h-9 w-9"} ${side === "left" ? "left-3" : "right-3"}`}
+      className={`absolute top-1/2 z-10 grid -translate-y-1/2 place-items-center rounded-full bg-black/55 text-white transition hover:bg-black/75 ${large ? "h-10 w-10 sm:h-12 sm:w-12" : "h-8 w-8 sm:h-9 sm:w-9"} ${side === "left" ? "left-2 sm:left-3" : "right-2 sm:right-3"}`}
     >
       <Icon className={large ? "h-6 w-6" : "h-5 w-5"} />
     </button>

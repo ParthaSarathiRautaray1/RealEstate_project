@@ -30,15 +30,15 @@ export function OwnerForm() {
 
   return (
     <Card>
-      <CardContent className="p-6">
-        <h1 className="font-serif text-3xl font-semibold">Add owner</h1>
+      <CardContent className="p-4 sm:p-6">
+        <h1 className="font-serif text-2xl font-semibold sm:text-3xl">Add owner</h1>
         <form ref={formRef} action={formAction} className="mt-5 grid gap-4">
           <div className="grid gap-2"><Label>Name</Label><Input name="name" required /><FieldError errors={fe.name} /></div>
           <div className="grid gap-2"><Label>Email</Label><Input name="email" type="email" /><FieldError errors={fe.email} /></div>
           <div className="grid gap-2"><Label>Phone</Label><Input name="phone" /><FieldError errors={fe.phone} /></div>
           <div className="grid gap-2"><Label>Avatar URL</Label><Input name="avatar_url" placeholder="https://…" /><FieldError errors={fe.avatar_url} /></div>
           <div className="grid gap-2"><Label>Bio</Label><Textarea name="bio" /></div>
-          <Button disabled={pending}>{pending ? "Saving…" : "Create owner"}</Button>
+          <Button disabled={pending} className="w-full sm:w-auto">{pending ? "Saving..." : "Create owner"}</Button>
           {state.status === "error" && state.message ? <p className="text-sm text-destructive">{state.message}</p> : null}
         </form>
       </CardContent>

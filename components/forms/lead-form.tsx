@@ -32,13 +32,13 @@ export function LeadForm({ propertyId }: { propertyId?: string }) {
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
       <input type="hidden" {...register("property_id")} />
       <div className="grid gap-2"><Label>Name</Label><Input {...register("name")} />{errors.name ? <p className="text-sm text-destructive">{errors.name.message}</p> : null}</div>
-      <div className="grid gap-2 md:grid-cols-2">
-        <div><Label>Email</Label><Input type="email" {...register("email")} />{errors.email ? <p className="text-sm text-destructive">{errors.email.message}</p> : null}</div>
-        <div><Label>Phone</Label><Input {...register("phone")} />{errors.phone ? <p className="text-sm text-destructive">{errors.phone.message}</p> : null}</div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-2"><Label>Email</Label><Input type="email" {...register("email")} />{errors.email ? <p className="text-sm text-destructive">{errors.email.message}</p> : null}</div>
+        <div className="grid gap-2"><Label>Phone</Label><Input {...register("phone")} />{errors.phone ? <p className="text-sm text-destructive">{errors.phone.message}</p> : null}</div>
       </div>
       <div className="grid gap-2"><Label>Budget</Label><Input type="number" {...register("budget")} /></div>
       <div className="grid gap-2"><Label>Message</Label><Textarea {...register("message")} placeholder="Tell us what you would like to schedule or know." /></div>
-      <Button disabled={isSubmitting}>{isSubmitting ? "Sending..." : "Request private consultation"}</Button>
+      <Button disabled={isSubmitting} className="w-full sm:w-auto">{isSubmitting ? "Sending..." : "Request private consultation"}</Button>
       {status ? <p className="text-sm text-muted-foreground">{status}</p> : null}
       <Toast open={toast} onOpenChange={setToast} title="Inquiry sent" description="The admin team has been notified and will follow up shortly." />
       <Toast open={errorToast} onOpenChange={setErrorToast} title="Inquiry failed" description="Please check Supabase tables and Resend credentials, then try again." />

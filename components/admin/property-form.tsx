@@ -40,7 +40,7 @@ export function PropertyForm({ property, owners }: { property?: Property; owners
   }
 
   return (
-    <form action={formAction} className="grid gap-5 rounded-lg border bg-card p-6">
+    <form action={formAction} className="grid gap-5 rounded-lg border bg-card p-4 sm:p-6">
       {property ? <input type="hidden" name="id" value={property.id} /> : null}
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -64,7 +64,7 @@ export function PropertyForm({ property, owners }: { property?: Property; owners
         <FieldError errors={fe.description} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="grid gap-2"><Label>Price</Label><Input name="price" type="number" min="0" step="any" defaultValue={property?.price} required /><FieldError errors={fe.price} /></div>
         <div className="grid gap-2"><Label>Property type</Label><Input name="property_type" defaultValue={property?.property_type} placeholder="Villa, Penthouse…" required /><FieldError errors={fe.property_type} /></div>
         <div className="grid gap-2"><Label>Status</Label><select name="status" defaultValue={property?.status || "published"} className="h-10 rounded-lg border bg-background px-3 text-sm"><option value="published">Published</option><option value="draft">Draft</option><option value="sold">Sold</option></select></div>
@@ -95,8 +95,8 @@ export function PropertyForm({ property, owners }: { property?: Property; owners
         <p className="text-xs text-muted-foreground">Paste normal watch, share, Shorts, live, or embed links. They are converted to embeds automatically.</p>
       </div>
 
-      <div className="flex items-center gap-3">
-        <Button disabled={pending}>{pending ? "Saving…" : property ? "Update property" : "Create property"}</Button>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <Button disabled={pending} className="w-full sm:w-auto">{pending ? "Saving..." : property ? "Update property" : "Create property"}</Button>
         {state.status === "error" && state.message ? <p className="text-sm text-destructive">{state.message}</p> : null}
       </div>
 

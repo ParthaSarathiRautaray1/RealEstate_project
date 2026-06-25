@@ -72,7 +72,7 @@ export function ImageUploader({ defaultUrls = [] }: { defaultUrls?: string[] }) 
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileRef.current?.click(); } }}
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); if (e.dataTransfer.files?.length) uploadFiles(e.dataTransfer.files); }}
-        className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed bg-background/50 p-6 text-center text-sm text-muted-foreground outline-none transition hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+        className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed bg-background/50 p-4 text-center text-sm text-muted-foreground outline-none transition hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring sm:p-6"
       >
         {uploading ? <Loader2 className="h-5 w-5 animate-spin text-primary" /> : <ImagePlus className="h-5 w-5 text-primary" />}
         <span className="font-medium text-foreground">{uploading ? "Uploading to Cloudinary…" : "Click or drag photos here"}</span>
@@ -82,13 +82,13 @@ export function ImageUploader({ defaultUrls = [] }: { defaultUrls?: string[] }) 
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-      <div className="flex gap-2">
+      <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
         <Input value={manual} onChange={(e) => setManual(e.target.value)} placeholder="…or paste an existing image URL" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addManual(); } }} />
         <Button type="button" variant="outline" onClick={addManual}><Plus className="h-4 w-4" />Add</Button>
       </div>
 
       {urls.length ? (
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {urls.map((url, index) => (
             <div key={`${url}-${index}`} className="group relative aspect-square overflow-hidden rounded-lg border bg-muted">
               {/* eslint-disable-next-line @next/next/no-img-element */}

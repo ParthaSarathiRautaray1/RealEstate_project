@@ -10,5 +10,5 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
     supabaseAdmin.from("owners").select("*").order("name")
   ]);
   if (!property) notFound();
-  return <div><h1 className="mb-6 font-serif text-4xl font-semibold">Edit property</h1><PropertyForm property={property as Property} owners={owners || []} /></div>;
+  return <div><h1 className="mb-6 font-serif text-3xl font-semibold sm:text-4xl">Edit property</h1><PropertyForm property={property as Property} owners={owners || []} /></div>;
 }

@@ -55,7 +55,7 @@ export function LocationPicker({ defaultLocation = "", defaultLat, defaultLng }:
   const lngNum = parseFloat(lng);
 
   return (
-    <div className="grid gap-4 rounded-lg border bg-background/40 p-4">
+    <div className="grid gap-4 rounded-lg border bg-background/40 p-3 sm:p-4">
       <div className="grid gap-2">
         <Label>Location</Label>
         <Input name="location" value={location} onChange={(e) => setLocation(e.target.value)} required placeholder="e.g. Calangute, Goa" />
@@ -63,7 +63,7 @@ export function LocationPicker({ defaultLocation = "", defaultLat, defaultLng }:
 
       <div className="grid gap-2">
         <Label>Find on map</Label>
-        <div className="flex gap-2">
+        <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -79,11 +79,11 @@ export function LocationPicker({ defaultLocation = "", defaultLat, defaultLng }:
         <p className="text-xs text-muted-foreground">Search an address, or click the map to drop the pin (drag to fine-tune). Latitude &amp; longitude fill in automatically.</p>
       </div>
 
-      <div className="h-[320px] overflow-hidden rounded-lg border">
+      <div className="h-[260px] overflow-hidden rounded-lg border sm:h-[320px]">
         <LocationMapInner lat={latNum} lng={lngNum} onPick={setPoint} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
           <Label>Latitude</Label>
           <Input name="latitude" type="number" step="any" required value={lat} onChange={(e) => setLat(e.target.value)} placeholder="40.7128" />
