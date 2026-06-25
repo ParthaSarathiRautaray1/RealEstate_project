@@ -2,6 +2,16 @@
 
 Production-ready real estate lead generation and property showcase platform built with Next.js 15, TypeScript, Tailwind CSS, Shadcn-style UI primitives, Supabase PostgreSQL/Auth, Cloudinary, Resend, Leaflet, and Vercel.
 
+## Current Status
+
+- GitHub: https://github.com/ParthaSarathiRautaray1/RealEstate_project
+- Production: https://realestateproject-ten.vercel.app
+- Vercel project: `realestate_project`
+- Primary branch: `main`
+- Local project path: `C:\Users\parth\OneDrive\Desktop\Real`
+
+The app is deployed and reachable on Vercel. Supabase, Cloudinary, and Resend credentials are configured locally in `.env.local` and in Vercel production environment variables. Do not commit real credentials.
+
 ## Phases Delivered
 
 1. Database: `supabase/schema.sql` defines admins, owners, properties, property images, YouTube videos, reviews, and leads with RLS policies and indexes.
@@ -20,6 +30,20 @@ npm run dev
 
 Fill `.env.local` with Supabase, Cloudinary, Resend, and admin email values.
 
+Required environment variables:
+
+```env
+NEXT_PUBLIC_SITE_URL=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+RESEND_API_KEY=
+ADMIN_EMAIL=
+```
+
 ## Supabase Setup
 
 1. Create a Supabase project.
@@ -33,6 +57,8 @@ values ('AUTH_USER_UUID', 'admin@example.com', 'Admin');
 ```
 
 5. Optionally run `supabase/seed.sql` for demo listings.
+
+If Supabase warns that `schema.sql` has destructive operations, that is expected because the schema drops/recreates policies and one trigger so it can be run again safely during setup.
 
 ## Cloudinary Setup
 
@@ -57,13 +83,34 @@ ADMIN_EMAIL=
 
 Lead submissions are saved in Supabase and emailed to `ADMIN_EMAIL`.
 
+If Resend delivery fails, the API still saves the lead and logs the email error. For production sending, verify a domain in Resend and replace `onboarding@resend.dev` in `app/api/leads/route.ts` with a verified sender.
+
 ## Vercel Deployment
 
-1. Push this project to GitHub.
-2. Import the repository in Vercel.
+This project has already been deployed once with Vercel CLI.
+
+Useful commands:
+
+```bash
+vercel env ls
+vercel deploy --prod
+```
+
+For a fresh deployment:
+
+1. Push the latest `main` branch to GitHub.
+2. Import or link the repository in Vercel.
 3. Add all variables from `.env.example`.
 4. Set `NEXT_PUBLIC_SITE_URL` to the production domain.
 5. Deploy.
+
+Current production alias:
+
+```txt
+https://realestateproject-ten.vercel.app
+```
+
+Note: after the first successful production deploy, two later CLI redeploy attempts were shown by Vercel CLI as `UNKNOWN`. The ready production deployment remains live and aliased to the URL above.
 
 ## Major Modules
 
@@ -80,3 +127,19 @@ Lead submissions are saved in Supabase and emailed to `ADMIN_EMAIL`.
 ## Notes
 
 The UI includes responsive layouts, dark mode variables, loading skeletons, empty states, hover transitions, scroll reveal animations, SEO metadata, sitemap, and robots configuration.
+
+Implementation notes from setup:
+
+- `schema.sql` is re-runnable and drops existing policies before recreating them.
+- The contact lead form converts empty `property_id` and `budget` values to `null`.
+- The lead form shows visible success/failure feedback.
+- The project uses local/system fonts instead of `next/font/google` so builds do not depend on Google Fonts network access.
+- Leaflet maps are loaded through a client-only dynamic wrapper for Next.js 15 compatibility.
+
+Verification commands:
+
+```bash
+npm run lint
+npm run typecheck
+npm run build
+```
