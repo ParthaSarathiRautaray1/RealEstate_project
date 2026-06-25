@@ -7,7 +7,7 @@ import { LeadForm } from "@/components/forms/lead-form";
 import { PropertyCard } from "@/components/property/property-card";
 import { DynamicPropertyMap } from "@/components/maps/dynamic-property-map";
 import { averageRating, getProperties, getPropertyBySlug } from "@/lib/data";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, youtubeEmbedUrl } from "@/lib/utils";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -32,7 +32,12 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
       <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_380px]">
         <div className="grid gap-8">
           <Card><CardContent className="p-6"><h2 className="font-serif text-3xl font-semibold">Property details</h2><p className="mt-4 leading-7 text-muted-foreground">{property.description}</p></CardContent></Card>
-          {property.property_videos?.length ? <Card><CardContent className="p-6"><h2 className="font-serif text-3xl font-semibold">Video tour</h2><div className="mt-4 grid gap-4">{property.property_videos.map((video) => <iframe key={video.id} className="aspect-video w-full rounded-lg" src={toEmbed(video.youtube_url)} title={video.title || property.title} allowFullScreen />)}</div></CardContent></Card> : null}
+          {property.property_videos?.length ? <Card><CardContent className="p-6"><h2 className="font-serif text-3xl font-semibold">Video tour</h2><div className="mt-4 grid gap-4">{property.property_videos.map((video) => {
+            const embed = youtubeEmbedUrl(video.youtube_url);
+            return embed
+              ? <iframe key={video.id} className="aspect-video w-full rounded-lg border-0" src={embed} title={video.title || property.title} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
+              : <a key={video.id} href={video.youtube_url} target="_blank" rel="noreferrer" className="text-sm text-primary underline underline-offset-4">Watch this video on YouTube</a>;
+          })}</div></CardContent></Card> : null}
           <Card><CardContent className="p-6"><h2 className="font-serif text-3xl font-semibold">Location</h2><div className="mt-4 h-[420px] overflow-hidden rounded-lg border"><DynamicPropertyMap properties={[property]} center={[property.latitude, property.longitude]} /></div></CardContent></Card>
           <Card><CardContent className="p-6"><h2 className="font-serif text-3xl font-semibold">Reviews</h2><div className="mt-4 grid gap-4">{reviews.length ? reviews.map((review) => <div key={review.id} className="border-b pb-4 last:border-0"><p className="font-semibold">{review.user_name} <span className="text-accent">{"*".repeat(review.rating)}</span></p><p className="mt-1 text-sm text-muted-foreground">{review.review}</p></div>) : <p className="text-muted-foreground">No approved reviews yet.</p>}</div></CardContent></Card>
           {related.length ? <div><h2 className="mb-4 font-serif text-3xl font-semibold">Related properties</h2><div className="grid gap-6 md:grid-cols-3">{related.map((item) => <PropertyCard key={item.id} property={item} />)}</div></div> : null}
@@ -44,9 +49,4 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
       </div>
     </main>
   );
-}
-
-function toEmbed(url: string) {
-  const match = url.match(/(?:youtu\.be\/|v=)([^&]+)/);
-  return match ? `https://www.youtube.com/embed/${match[1]}` : url;
 }

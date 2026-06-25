@@ -2,22 +2,56 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import type { ZodError } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { ownerSchema, propertySchema, reviewSchema } from "@/lib/validations/schemas";
+import type { FormState } from "@/lib/actions/form-state";
 
 function splitLines(value?: string) {
   return (value || "").split(/\r?\n|,/).map((item) => item.trim()).filter(Boolean);
 }
 
-export async function upsertProperty(formData: FormData) {
+function invalid(error: ZodError): FormState {
+  return {
+    status: "error",
+    message: "Please fix the highlighted fields and try again.",
+    fieldErrors: error.flatten().fieldErrors as FormState["fieldErrors"]
+  };
+}
+
+type DbError = { message?: string; code?: string; details?: string } | null;
+
+function dbMessage(error: NonNullable<DbError>): string {
+  switch (error.code) {
+    case "23505":
+      return "A record with one of these unique values already exists (for example the slug).";
+    case "23503":
+      return "A linked record is missing. Refresh the page and try again.";
+    case "23514":
+      return "A value is outside the allowed range.";
+    default:
+      return error.message || "Database error. Please try again.";
+  }
+}
+
+function requireId(formData: FormData): string {
+  return String(formData.get("id") || "");
+}
+
+export async function upsertProperty(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = propertySchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) throw new Error("Invalid property data");
+  if (!parsed.success) return invalid(parsed.error);
+
   const { image_urls, youtube_urls, ...property } = parsed.data;
-  const id = String(formData.get("id") || "");
+  const id = requireId(formData);
   const { data, error } = id
     ? await supabaseAdmin.from("properties").update(property).eq("id", id).select("id").single()
     : await supabaseAdmin.from("properties").insert(property).select("id").single();
-  if (error) throw new Error(error.message);
+
+  if (error || !data) {
+    const fieldErrors = error?.code === "23505" ? { slug: ["This slug is already taken — pick a different one."] } : undefined;
+    return { status: "error", message: error ? dbMessage(error) : "Could not save the property.", fieldErrors };
+  }
 
   if (id) {
     await supabaseAdmin.from("property_images").delete().eq("property_id", data.id);
@@ -25,51 +59,81 @@ export async function upsertProperty(formData: FormData) {
   }
   const images = splitLines(image_urls).map((url, index) => ({ property_id: data.id, url, alt: property.title, sort_order: index }));
   const videos = splitLines(youtube_urls).map((youtube_url) => ({ property_id: data.id, youtube_url, title: property.title }));
-  if (images.length) await supabaseAdmin.from("property_images").insert(images);
-  if (videos.length) await supabaseAdmin.from("property_videos").insert(videos);
+  if (images.length) {
+    const { error: imageError } = await supabaseAdmin.from("property_images").insert(images);
+    if (imageError) return { status: "error", message: `Property saved, but the images failed: ${imageError.message}` };
+  }
+  if (videos.length) {
+    const { error: videoError } = await supabaseAdmin.from("property_videos").insert(videos);
+    if (videoError) return { status: "error", message: `Property saved, but the videos failed: ${videoError.message}` };
+  }
+
   revalidatePath("/");
   revalidatePath("/properties");
+  revalidatePath("/admin/properties");
   redirect("/admin/properties");
 }
 
-export async function deleteProperty(formData: FormData) {
-  await supabaseAdmin.from("properties").delete().eq("id", String(formData.get("id")));
+export async function deleteProperty(_prev: FormState, formData: FormData): Promise<FormState> {
+  const id = requireId(formData);
+  if (!id) return { status: "error", message: "Missing property id." };
+  const { error } = await supabaseAdmin.from("properties").delete().eq("id", id);
+  if (error) return { status: "error", message: dbMessage(error) };
   revalidatePath("/");
   revalidatePath("/properties");
+  revalidatePath("/admin/properties");
+  return { status: "success", message: "Property deleted." };
 }
 
-export async function upsertOwner(formData: FormData) {
+export async function upsertOwner(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = ownerSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) throw new Error("Invalid owner data");
-  const id = String(formData.get("id") || "");
+  if (!parsed.success) return invalid(parsed.error);
+  const id = requireId(formData);
   const payload = { ...parsed.data, email: parsed.data.email || null, avatar_url: parsed.data.avatar_url || null };
-  const request = id ? supabaseAdmin.from("owners").update(payload).eq("id", id) : supabaseAdmin.from("owners").insert(payload);
-  const { error } = await request;
-  if (error) throw new Error(error.message);
+  const { error } = id
+    ? await supabaseAdmin.from("owners").update(payload).eq("id", id)
+    : await supabaseAdmin.from("owners").insert(payload);
+  if (error) return { status: "error", message: dbMessage(error) };
   revalidatePath("/admin/owners");
+  return { status: "success", message: id ? "Owner updated." : "Owner created." };
 }
 
-export async function deleteOwner(formData: FormData) {
-  await supabaseAdmin.from("owners").delete().eq("id", String(formData.get("id")));
+export async function deleteOwner(_prev: FormState, formData: FormData): Promise<FormState> {
+  const id = requireId(formData);
+  if (!id) return { status: "error", message: "Missing owner id." };
+  const { error } = await supabaseAdmin.from("owners").delete().eq("id", id);
+  if (error) return { status: "error", message: dbMessage(error) };
   revalidatePath("/admin/owners");
+  return { status: "success", message: "Owner deleted." };
 }
 
-export async function upsertReview(formData: FormData) {
+export async function upsertReview(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = reviewSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) throw new Error("Invalid review data");
-  const id = String(formData.get("id") || "");
-  const request = id ? supabaseAdmin.from("reviews").update(parsed.data).eq("id", id) : supabaseAdmin.from("reviews").insert(parsed.data);
-  const { error } = await request;
-  if (error) throw new Error(error.message);
+  if (!parsed.success) return invalid(parsed.error);
+  const id = requireId(formData);
+  const { error } = id
+    ? await supabaseAdmin.from("reviews").update(parsed.data).eq("id", id)
+    : await supabaseAdmin.from("reviews").insert(parsed.data);
+  if (error) return { status: "error", message: dbMessage(error) };
   revalidatePath("/admin/reviews");
+  return { status: "success", message: id ? "Review updated." : "Review created." };
 }
 
-export async function approveReview(formData: FormData) {
-  await supabaseAdmin.from("reviews").update({ approved: true }).eq("id", String(formData.get("id")));
+export async function approveReview(_prev: FormState, formData: FormData): Promise<FormState> {
+  const id = requireId(formData);
+  if (!id) return { status: "error", message: "Missing review id." };
+  const { error } = await supabaseAdmin.from("reviews").update({ approved: true }).eq("id", id);
+  if (error) return { status: "error", message: dbMessage(error) };
   revalidatePath("/admin/reviews");
+  revalidatePath("/");
+  return { status: "success", message: "Review approved." };
 }
 
-export async function deleteReview(formData: FormData) {
-  await supabaseAdmin.from("reviews").delete().eq("id", String(formData.get("id")));
+export async function deleteReview(_prev: FormState, formData: FormData): Promise<FormState> {
+  const id = requireId(formData);
+  if (!id) return { status: "error", message: "Missing review id." };
+  const { error } = await supabaseAdmin.from("reviews").delete().eq("id", id);
+  if (error) return { status: "error", message: dbMessage(error) };
   revalidatePath("/admin/reviews");
+  return { status: "success", message: "Review deleted." };
 }

@@ -1,6 +1,6 @@
 import { Check, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ActionButton } from "@/components/admin/action-button";
 import { approveReview, deleteReview } from "@/lib/actions/admin";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
@@ -19,7 +19,27 @@ export default async function ReviewsPage() {
     <div>
       <h1 className="font-serif text-4xl font-semibold">Reviews</h1>
       <div className="mt-6 grid gap-3">
-        {data?.length ? (data as ReviewRow[]).map((review) => <Card key={review.id}><CardContent className="flex items-center justify-between gap-4 p-4"><div><p className="font-semibold">{review.user_name} · {"*".repeat(review.rating)}</p><p className="text-sm text-muted-foreground">{review.properties?.title} · {review.approved ? "Approved" : "Pending"}</p><p className="mt-2 text-sm">{review.review}</p></div><div className="flex gap-2">{!review.approved ? <form action={approveReview}><input type="hidden" name="id" value={review.id} /><Button size="icon" variant="outline"><Check className="h-4 w-4" /></Button></form> : null}<form action={deleteReview}><input type="hidden" name="id" value={review.id} /><Button size="icon" variant="ghost"><Trash2 className="h-4 w-4" /></Button></form></div></CardContent></Card>) : <div className="rounded-lg border border-dashed bg-card p-10 text-center text-muted-foreground">No reviews yet.</div>}
+        {data?.length ? (data as ReviewRow[]).map((review) => (
+          <Card key={review.id}>
+            <CardContent className="flex items-center justify-between gap-4 p-4">
+              <div>
+                <p className="font-semibold">{review.user_name} · {"*".repeat(review.rating)}</p>
+                <p className="text-sm text-muted-foreground">{review.properties?.title} · {review.approved ? "Approved" : "Pending"}</p>
+                <p className="mt-2 text-sm">{review.review}</p>
+              </div>
+              <div className="flex gap-2">
+                {!review.approved ? (
+                  <ActionButton action={approveReview} id={review.id} variant="outline" size="icon" ariaLabel="Approve review">
+                    <Check className="h-4 w-4" />
+                  </ActionButton>
+                ) : null}
+                <ActionButton action={deleteReview} id={review.id} confirm="Delete this review?" variant="ghost" size="icon" ariaLabel="Delete review">
+                  <Trash2 className="h-4 w-4" />
+                </ActionButton>
+              </div>
+            </CardContent>
+          </Card>
+        )) : <div className="rounded-lg border border-dashed bg-card p-10 text-center text-muted-foreground">No reviews yet.</div>}
       </div>
     </div>
   );

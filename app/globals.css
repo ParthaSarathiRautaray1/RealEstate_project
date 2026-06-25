@@ -3,57 +3,109 @@
 @tailwind utilities;
 
 :root {
-  --background: 42 38% 97%;
-  --foreground: 220 20% 12%;
+  /* Light — warm ivory canvas, deep emerald, champagne gold */
+  --background: 40 33% 98%;
+  --foreground: 200 16% 13%;
   --card: 0 0% 100%;
-  --card-foreground: 220 20% 12%;
-  --primary: 170 42% 24%;
-  --primary-foreground: 40 38% 96%;
-  --secondary: 38 38% 88%;
-  --secondary-foreground: 220 20% 12%;
-  --muted: 42 22% 91%;
-  --muted-foreground: 220 10% 42%;
-  --accent: 10 72% 58%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 72% 50%;
+  --card-foreground: 200 16% 13%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 200 16% 13%;
+  --primary: 162 47% 21%;
+  --primary-foreground: 40 33% 97%;
+  --secondary: 38 38% 91%;
+  --secondary-foreground: 200 16% 13%;
+  --muted: 40 22% 93%;
+  --muted-foreground: 200 9% 42%;
+  --accent: 36 68% 48%;
+  --accent-foreground: 200 24% 10%;
+  --destructive: 0 72% 48%;
   --destructive-foreground: 0 0% 100%;
-  --border: 36 20% 82%;
-  --input: 36 20% 82%;
-  --ring: 170 42% 24%;
-  --radius: 0.5rem;
+  --border: 38 22% 86%;
+  --input: 38 22% 86%;
+  --ring: 162 47% 28%;
+  --radius: 0.85rem;
+  --gold: 36 68% 48%;
+  --emerald: 162 47% 21%;
 }
 
 .dark {
-  --background: 220 18% 9%;
-  --foreground: 40 28% 94%;
-  --card: 220 16% 12%;
-  --card-foreground: 40 28% 94%;
-  --primary: 165 44% 44%;
-  --primary-foreground: 220 18% 9%;
-  --secondary: 220 12% 18%;
-  --secondary-foreground: 40 28% 94%;
-  --muted: 220 12% 18%;
-  --muted-foreground: 40 10% 68%;
-  --accent: 10 72% 58%;
-  --accent-foreground: 0 0% 100%;
-  --border: 220 12% 24%;
-  --input: 220 12% 24%;
-  --ring: 165 44% 44%;
+  /* Dark — derived from the light system: charcoal-green canvas, luminous emerald + gold */
+  --background: 196 22% 7%;
+  --foreground: 40 26% 93%;
+  --card: 197 20% 10%;
+  --card-foreground: 40 26% 93%;
+  --popover: 197 20% 10%;
+  --popover-foreground: 40 26% 93%;
+  --primary: 158 48% 46%;
+  --primary-foreground: 196 30% 7%;
+  --secondary: 197 14% 16%;
+  --secondary-foreground: 40 26% 93%;
+  --muted: 197 14% 15%;
+  --muted-foreground: 40 10% 66%;
+  --accent: 40 76% 58%;
+  --accent-foreground: 196 30% 8%;
+  --destructive: 0 64% 52%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 197 14% 21%;
+  --input: 197 14% 21%;
+  --ring: 158 48% 46%;
+  --gold: 40 76% 58%;
+  --emerald: 158 48% 46%;
 }
 
 * { @apply border-border; }
 html { scroll-behavior: smooth; }
-body { @apply bg-background text-foreground antialiased; }
-body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-.font-serif { font-family: Georgia, "Times New Roman", serif; }
+body {
+  @apply bg-background text-foreground antialiased;
+  font-feature-settings: "ss01", "cv01", "cv03";
+}
 
+/* Premium serif display: optical sizing for refined headings */
+.font-serif { font-optical-sizing: auto; letter-spacing: -0.01em; }
+h1, h2, h3 { text-wrap: balance; }
+
+/* ---------- Surfaces & effects ---------- */
 .glass {
-  @apply border border-white/35 bg-white/70 shadow-luxury backdrop-blur-xl dark:border-white/10 dark:bg-card/70;
+  @apply border border-white/40 bg-white/65 shadow-luxury backdrop-blur-xl dark:border-white/10 dark:bg-card/60;
+}
+
+.text-gradient {
+  @apply bg-gradient-to-br from-[hsl(var(--emerald))] to-[hsl(var(--gold))] bg-clip-text text-transparent;
+}
+
+/* Soft radial glow used behind hero / feature blocks */
+.glow::before {
+  content: "";
+  position: absolute;
+  inset: -20% -10% auto -10%;
+  height: 60%;
+  background: radial-gradient(60% 60% at 50% 0%, hsl(var(--accent) / 0.18), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Subtle hairline ring that reads as premium on cards */
+.ring-luxury {
+  box-shadow: inset 0 1px 0 0 hsl(0 0% 100% / 0.5), 0 1px 2px hsl(200 16% 13% / 0.04);
+}
+.dark .ring-luxury {
+  box-shadow: inset 0 1px 0 0 hsl(0 0% 100% / 0.06);
+}
+
+/* 3D tilt helpers */
+.tilt-scene { perspective: 1100px; }
+.tilt-pop { transform: translateZ(40px); transform-style: preserve-3d; }
+.tilt-sheen {
+  background: linear-gradient(105deg, transparent 30%, hsl(0 0% 100% / 0.25) 48%, transparent 62%);
 }
 
 .leaflet-container {
   height: 100%;
   min-height: 360px;
   width: 100%;
-  border-radius: 0.5rem;
+  border-radius: 0.85rem;
 }
+
+/* Hide scrollbars on swipeable carousels while keeping scroll/snap behaviour */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
