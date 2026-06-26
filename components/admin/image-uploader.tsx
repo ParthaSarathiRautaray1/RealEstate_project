@@ -24,13 +24,18 @@ export function ImageUploader({ defaultUrls = [] }: { defaultUrls?: string[] }) 
     try {
       const added: string[] = [];
       for (const file of Array.from(files)) {
-        if (!file.type.startsWith("image/")) continue;
+        if (!file.type.startsWith("image/")) {
+          throw new Error(`${file.name} is not an image file.`);
+        }
+        if (file.size > 8 * 1024 * 1024) {
+          throw new Error(`${file.name} is too large. Upload images up to 8 MB.`);
+        }
         const body = new FormData();
         body.append("file", file);
         const res = await fetch("/api/admin/upload", { method: "POST", body });
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
-          throw new Error(data.error || `Upload failed (${res.status})`);
+          throw new Error(`${file.name}: ${data.error || `Upload failed with HTTP ${res.status}.`}`);
         }
         const { secure_url } = (await res.json()) as { secure_url?: string };
         if (secure_url) added.push(secure_url);

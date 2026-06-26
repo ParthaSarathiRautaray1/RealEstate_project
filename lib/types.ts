@@ -24,6 +24,19 @@ export type PropertyVideo = {
   title: string | null;
 };
 
+export type PropertyNearbyPlace = {
+  id: string;
+  property_id: string;
+  name: string;
+  category: string;
+  distance_km: number | null;
+  travel_time: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  notes: string | null;
+  sort_order: number;
+};
+
 export type Review = {
   id: string;
   property_id: string;
@@ -57,6 +70,9 @@ export type Property = {
   latitude: number;
   longitude: number;
   owner_id: string | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  area_sqft: number | null;
   featured: boolean;
   status: "draft" | "published" | "sold";
   created_at: string;
@@ -64,5 +80,6 @@ export type Property = {
   owners?: Owner | null;
   property_images?: PropertyImage[];
   property_videos?: PropertyVideo[];
+  property_nearby_places?: PropertyNearbyPlace[];
   reviews?: Review[];
 };

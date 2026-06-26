@@ -1,11 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Property } from "@/lib/types";
 
-const propertySelect = "*, owners(*), property_images(*), property_videos(*), reviews(*)";
+const propertySelect = "*, owners(*), property_images(*), property_videos(*), property_nearby_places(*), reviews(*)";
+// List/card views only need the cover image and rating fields — avoid pulling
+// every review/video/owner row for grids that never render them.
+const listSelect = "*, property_images(url, sort_order), reviews(rating, approved)";
 
-export async function getProperties({ featured, limit, query, type, sort = "created_at" }: { featured?: boolean; limit?: number; query?: string; type?: string; sort?: string } = {}) {
+export async function getProperties({ featured, limit, query, type, sort = "created_at", detail = false }: { featured?: boolean; limit?: number; query?: string; type?: string; sort?: string; detail?: boolean } = {}) {
   const supabase = await createClient();
-  let request = supabase.from("properties").select(propertySelect).eq("status", "published");
+  let request = supabase.from("properties").select(detail ? propertySelect : listSelect).eq("status", "published");
   if (featured !== undefined) request = request.eq("featured", featured);
   if (query) request = request.or(`title.ilike.%${query}%,location.ilike.%${query}%`);
   if (type) request = request.eq("property_type", type);
@@ -15,7 +18,9 @@ export async function getProperties({ featured, limit, query, type, sort = "crea
   if (limit) request = request.limit(limit);
   const { data, error } = await request;
   if (error) throw error;
-  return (data || []) as Property[];
+  // Select string is chosen at runtime, so the typed parser can't infer the row
+  // shape — cast through unknown. List rows are a subset of Property by design.
+  return (data || []) as unknown as Property[];
 }
 
 export async function getPropertyBySlug(slug: string) {

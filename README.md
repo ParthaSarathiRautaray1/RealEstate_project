@@ -165,6 +165,66 @@ The interface was designed light-first, with the dark theme derived from the sam
 
 Only presentation changed in this pass — data fetching, forms, validation, auth, and admin actions were left intact.
 
+## Responsive Design Pass
+
+The UI has been tuned for mobile, tablet, laptop, and desktop layouts, with mobile treated as the strictest breakpoint.
+
+- **Global safety**: `html` and `body` prevent accidental horizontal overflow; `.safe-break` wraps long emails, locations, URLs, messages, and property titles.
+- **Public header**: brand text truncates safely, actions stay compact, and the secondary `Browse` button hides on small screens.
+- **Home page**: hero and section headings scale down on mobile, statistics use a compact two-column mobile grid, and map sections use shorter mobile heights.
+- **Property listing page**: heading, filters, sort control, card grid, and map panel resize cleanly; the map becomes a normal stacked block before returning to sticky desktop behavior.
+- **Property detail page**: title/location text wraps safely, card padding is reduced on mobile, gallery/video/map/review sections stack cleanly, related properties adapt from one to two to three columns, and the inquiry/owner sidebar becomes a normal stacked flow on mobile.
+- **Gallery**: carousel/lightbox controls are smaller and inset on mobile, with tighter fullscreen padding.
+- **Admin shell**: the desktop sidebar becomes a sticky horizontal scroll nav on mobile so dashboard pages remain usable on narrow screens.
+- **Admin pages**: dashboard metrics, property/owner/review/lead cards, page headers, export/new buttons, and action buttons stack instead of squeezing into a single row.
+- **Admin forms**: property, owner, lead, image uploader, and location picker forms use smaller mobile padding, full-width submit buttons, stacked input groups, smaller map heights, and responsive uploader thumbnails.
+
+Responsive verification commands used:
+
+```bash
+npm run typecheck
+npm run lint
+npm run build
+```
+
+## Improvements Pass (Security, SEO, Performance, UX)
+
+A focused pass added hardening and polish across four tracks. Data fetching, auth, and admin actions stay intact.
+
+**Security & data integrity**
+
+- **Lead spam protection** (`app/api/leads/route.ts`): per-instance IP rate limit (5 requests/minute) plus a hidden honeypot field (`company`) wired into the lead form. Honeypot hits get a fake success response and are never stored or emailed. For multi-instance production, move the limiter to Upstash Redis.
+- **Email injection fixed**: all lead values are HTML-escaped before being placed into the Resend notification email.
+- **Upload validation** (`app/api/admin/upload/route.ts`): rejects non-image files and anything over 8 MB before sending to Cloudinary.
+- **Real beds / baths / area**: replaced the hardcoded "4 Beds / 3 Baths" on every card with real per-property fields, added to the admin property form, property card, and detail page.
+
+**SEO**
+
+- Property detail pages emit OpenGraph + Twitter card metadata (cover image), a canonical URL, and JSON-LD structured data (`Product`/`Residence` with price, availability, and aggregate rating) for richer search results.
+
+**Performance**
+
+- The homepage hero uses `next/image` with `priority` (better LCP) instead of a CSS background image.
+- List/grid queries (`lib/data.ts`) use a slimmer select (cover image + ratings only) instead of pulling every review, video, and owner row.
+
+**UX polish**
+
+- Reviews render filled/empty star icons instead of literal asterisks.
+- Added `error.tsx` boundaries for the public and admin route groups, so a data failure shows a friendly "Try again" card instead of a crash page.
+- The homepage "Signature properties" section falls back to the latest listings when no property is flagged featured.
+
+### Property-specs migration completed
+
+The beds/baths/area feature uses three columns on `public.properties`. The migration has been run in Supabase, and the file is kept at `supabase/migrations/add_property_specs.sql` for future environments:
+
+```sql
+alter table public.properties add column if not exists bedrooms integer;
+alter table public.properties add column if not exists bathrooms integer;
+alter table public.properties add column if not exists area_sqft integer;
+```
+
+After editing a property and filling Bedrooms, Bathrooms, and Area, the values appear on property cards and detail pages.
+
 ## Notes
 
 The UI includes responsive layouts, light/dark themes with a working toggle, loading skeletons, empty states, hover transitions, 3D tilt cards, scroll reveal animations, SEO metadata, sitemap, and robots configuration.
@@ -176,6 +236,7 @@ Implementation notes from setup:
 - The lead form shows visible success/failure feedback.
 - Fonts are loaded with `next/font/google` (Fraunces + Plus Jakarta Sans) and self-hosted by Next.js at build time, so there is no Google Fonts dependency at runtime. A network connection is only needed during the build.
 - Leaflet maps are loaded through a client-only dynamic wrapper for Next.js 15 compatibility.
+- Supabase SSR cookie writes are guarded in `lib/supabase/server.ts`; Server Components can read cookies but cannot modify them, while middleware and route handlers still handle real auth cookie refreshes.
 - The property form is a client component that still submits through the `upsertProperty` server action; the image uploader and location picker write into the same `image_urls` / `latitude` / `longitude` fields, so the server action and database schema are unchanged.
 - The slug auto-generates from the title for new properties but is left untouched when editing an existing property (so saved URLs stay stable).
 - The property gallery (`components/property/gallery.tsx`) is an Instagram-style swipeable carousel (native touch swipe, arrows, dots, thumbnail strip) with a fullscreen lightbox that has a close button and arrow-key/swipe navigation. The lightbox sits above Leaflet's map controls (`z-[1101]` vs Leaflet's `z-index: 1000`) so the map can never overlap the photo viewer.

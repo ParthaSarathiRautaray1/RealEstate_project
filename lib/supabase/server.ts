@@ -15,7 +15,12 @@ export async function createClient() {
           return cookieStore.getAll();
         },
         setAll(cookiesToSet: CookieToSet[]) {
-          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+          } catch {
+            // Server Components can read cookies but cannot modify them.
+            // Middleware refreshes Supabase auth cookies for normal requests.
+          }
         }
       }
     }

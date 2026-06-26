@@ -11,6 +11,8 @@ import { Toast } from "@/components/ui/toast";
 import { FieldError } from "@/components/admin/field-error";
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { LocationPicker } from "@/components/admin/location-picker";
+import { NearbyPlacesFields } from "@/components/admin/nearby-places-fields";
+import { propertyTypes, residentialPropertyTypes } from "@/lib/validations/schemas";
 import { slugify } from "@/lib/utils";
 import type { Owner, Property } from "@/lib/types";
 
@@ -18,7 +20,7 @@ export function PropertyForm({ property, owners }: { property?: Property; owners
   const [state, formAction, pending] = useActionState(upsertProperty, idleState);
   const [title, setTitle] = useState(property?.title ?? "");
   const [slug, setSlug] = useState(property?.slug ?? "");
-  // Keep an existing property's slug stable; only auto-sync when untouched.
+  const [propertyType, setPropertyType] = useState(property?.property_type ?? "Villa");
   const [slugLocked, setSlugLocked] = useState(Boolean(property?.slug));
   const [errorOpen, setErrorOpen] = useState(false);
 
@@ -28,6 +30,7 @@ export function PropertyForm({ property, owners }: { property?: Property; owners
 
   const fe = state.fieldErrors ?? {};
   const locationError = fe.location ?? fe.latitude ?? fe.longitude;
+  const showRoomFields = (residentialPropertyTypes as readonly string[]).includes(propertyType);
 
   function onTitleChange(value: string) {
     setTitle(value);
@@ -52,7 +55,7 @@ export function PropertyForm({ property, owners }: { property?: Property; owners
         <div className="grid gap-2">
           <Label>Slug</Label>
           <Input name="slug" value={slug} onChange={(e) => onSlugChange(e.target.value)} required />
-          <p className="text-xs text-muted-foreground">Public URL: <span className="font-mono">/properties/{slug || "your-slug"}</span> — auto-filled from the title; edit to override.</p>
+          <p className="text-xs text-muted-foreground">Public URL: <span className="font-mono">/properties/{slug || "your-slug"}</span> - auto-filled from the title; edit to override.</p>
           <FieldError errors={fe.slug} />
         </div>
       </div>
@@ -65,9 +68,53 @@ export function PropertyForm({ property, owners }: { property?: Property; owners
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="grid gap-2"><Label>Price</Label><Input name="price" type="number" min="0" step="any" defaultValue={property?.price} required /><FieldError errors={fe.price} /></div>
-        <div className="grid gap-2"><Label>Property type</Label><Input name="property_type" defaultValue={property?.property_type} placeholder="Villa, Penthouse…" required /><FieldError errors={fe.property_type} /></div>
-        <div className="grid gap-2"><Label>Status</Label><select name="status" defaultValue={property?.status || "published"} className="h-10 rounded-lg border bg-background px-3 text-sm"><option value="published">Published</option><option value="draft">Draft</option><option value="sold">Sold</option></select></div>
+        <div className="grid gap-2">
+          <Label>Price</Label>
+          <Input name="price" type="number" min="0" step="any" defaultValue={property?.price} required />
+          <FieldError errors={fe.price} />
+        </div>
+        <div className="grid gap-2">
+          <Label>Property type</Label>
+          <select name="property_type" value={propertyType} onChange={(e) => setPropertyType(e.target.value)} className="h-10 rounded-lg border bg-background px-3 text-sm">
+            {propertyTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+          </select>
+          <FieldError errors={fe.property_type} />
+        </div>
+        <div className="grid gap-2">
+          <Label>Status</Label>
+          <select name="status" defaultValue={property?.status || "published"} className="h-10 rounded-lg border bg-background px-3 text-sm">
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+            <option value="sold">Sold</option>
+          </select>
+        </div>
+      </div>
+
+      <div className={`grid gap-4 ${showRoomFields ? "sm:grid-cols-3" : "sm:grid-cols-1"}`}>
+        {showRoomFields ? (
+          <>
+            <div className="grid gap-2">
+              <Label>Bedrooms</Label>
+              <Input name="bedrooms" type="number" min="0" step="1" defaultValue={property?.bedrooms ?? ""} placeholder="e.g. 4" />
+              <FieldError errors={fe.bedrooms} />
+            </div>
+            <div className="grid gap-2">
+              <Label>Bathrooms</Label>
+              <Input name="bathrooms" type="number" min="0" step="1" defaultValue={property?.bathrooms ?? ""} placeholder="e.g. 3" />
+              <FieldError errors={fe.bathrooms} />
+            </div>
+          </>
+        ) : (
+          <>
+            <input type="hidden" name="bedrooms" value="" />
+            <input type="hidden" name="bathrooms" value="" />
+          </>
+        )}
+        <div className="grid gap-2">
+          <Label>Area (sq ft)</Label>
+          <Input name="area_sqft" type="number" min="0" step="1" defaultValue={property?.area_sqft ?? ""} placeholder="e.g. 2400" />
+          <FieldError errors={fe.area_sqft} />
+        </div>
       </div>
 
       <div className="grid gap-2">
@@ -78,7 +125,10 @@ export function PropertyForm({ property, owners }: { property?: Property; owners
 
       <div className="grid gap-2">
         <Label>Owner</Label>
-        <select name="owner_id" defaultValue={property?.owner_id || ""} className="h-10 rounded-lg border bg-background px-3 text-sm"><option value="">No owner</option>{owners.map((owner) => <option key={owner.id} value={owner.id}>{owner.name}</option>)}</select>
+        <select name="owner_id" defaultValue={property?.owner_id || ""} className="h-10 rounded-lg border bg-background px-3 text-sm">
+          <option value="">No owner</option>
+          {owners.map((owner) => <option key={owner.id} value={owner.id}>{owner.name}</option>)}
+        </select>
         <FieldError errors={fe.owner_id} />
       </div>
 
@@ -90,8 +140,14 @@ export function PropertyForm({ property, owners }: { property?: Property; owners
       </div>
 
       <div className="grid gap-2">
+        <Label>Nearest important places</Label>
+        <NearbyPlacesFields defaultPlaces={property?.property_nearby_places ?? []} />
+        <FieldError errors={fe.nearby_places} />
+      </div>
+
+      <div className="grid gap-2">
         <Label>YouTube video links</Label>
-        <Textarea name="youtube_urls" defaultValue={property?.property_videos?.map((video) => video.youtube_url).join("\n")} placeholder="One link per line — e.g. https://youtu.be/VIDEO_ID" />
+        <Textarea name="youtube_urls" defaultValue={property?.property_videos?.map((video) => video.youtube_url).join("\n")} placeholder="One link per line - e.g. https://youtu.be/VIDEO_ID" />
         <p className="text-xs text-muted-foreground">Paste normal watch, share, Shorts, live, or embed links. They are converted to embeds automatically.</p>
       </div>
 

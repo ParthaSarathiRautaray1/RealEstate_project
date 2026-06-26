@@ -51,6 +51,20 @@ create table if not exists public.property_videos (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.property_nearby_places (
+  id uuid primary key default gen_random_uuid(),
+  property_id uuid not null references public.properties(id) on delete cascade,
+  name text not null,
+  category text not null,
+  distance_km numeric(8,2),
+  travel_time text,
+  latitude double precision,
+  longitude double precision,
+  notes text,
+  sort_order int not null default 0,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists public.reviews (
   id uuid primary key default gen_random_uuid(),
   property_id uuid not null references public.properties(id) on delete cascade,
@@ -75,6 +89,7 @@ create table if not exists public.leads (
 create index if not exists properties_status_idx on public.properties(status);
 create index if not exists properties_featured_idx on public.properties(featured);
 create index if not exists properties_price_idx on public.properties(price);
+create index if not exists property_nearby_places_property_idx on public.property_nearby_places(property_id, sort_order);
 create index if not exists leads_created_at_idx on public.leads(created_at desc);
 
 create or replace function public.set_updated_at()
@@ -95,6 +110,7 @@ alter table public.owners enable row level security;
 alter table public.properties enable row level security;
 alter table public.property_images enable row level security;
 alter table public.property_videos enable row level security;
+alter table public.property_nearby_places enable row level security;
 alter table public.reviews enable row level security;
 alter table public.leads enable row level security;
 
@@ -111,6 +127,8 @@ drop policy if exists "Public can read property images" on public.property_image
 drop policy if exists "Admins manage property images" on public.property_images;
 drop policy if exists "Public can read property videos" on public.property_videos;
 drop policy if exists "Admins manage property videos" on public.property_videos;
+drop policy if exists "Public can read nearby places" on public.property_nearby_places;
+drop policy if exists "Admins manage nearby places" on public.property_nearby_places;
 drop policy if exists "Public can read approved reviews" on public.reviews;
 drop policy if exists "Admins manage reviews" on public.reviews;
 drop policy if exists "Anyone can create leads" on public.leads;
@@ -130,6 +148,9 @@ create policy "Admins manage property images" on public.property_images for all 
 
 create policy "Public can read property videos" on public.property_videos for select using (true);
 create policy "Admins manage property videos" on public.property_videos for all using (public.is_admin()) with check (public.is_admin());
+
+create policy "Public can read nearby places" on public.property_nearby_places for select using (true);
+create policy "Admins manage nearby places" on public.property_nearby_places for all using (public.is_admin()) with check (public.is_admin());
 
 create policy "Public can read approved reviews" on public.reviews for select using (approved = true or public.is_admin());
 create policy "Admins manage reviews" on public.reviews for all using (public.is_admin()) with check (public.is_admin());

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { ZodError } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { ownerSchema, propertySchema, reviewSchema } from "@/lib/validations/schemas";
+import { ownerSchema, parseNearbyPlaces, propertySchema, reviewSchema, residentialPropertyTypes } from "@/lib/validations/schemas";
 import type { FormState } from "@/lib/actions/form-state";
 
 function splitLines(value?: string) {
@@ -42,7 +42,23 @@ export async function upsertProperty(_prev: FormState, formData: FormData): Prom
   const parsed = propertySchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return invalid(parsed.error);
 
-  const { image_urls, youtube_urls, ...property } = parsed.data;
+  const nearbyParsed = parseNearbyPlaces(parsed.data.nearby_places);
+  if (!nearbyParsed.success) {
+    return {
+      status: "error",
+      message: "Please check the nearby places. Each saved place needs at least a name and category.",
+      fieldErrors: { nearby_places: ["Please check nearby place details."] }
+    };
+  }
+
+  const { image_urls, youtube_urls, nearby_places, ...propertyInput } = parsed.data;
+  void nearby_places;
+  const needsRooms = (residentialPropertyTypes as readonly string[]).includes(propertyInput.property_type);
+  const property = {
+    ...propertyInput,
+    bedrooms: needsRooms ? propertyInput.bedrooms : null,
+    bathrooms: needsRooms ? propertyInput.bathrooms : null
+  };
   const id = requireId(formData);
   const { data, error } = id
     ? await supabaseAdmin.from("properties").update(property).eq("id", id).select("id").single()
@@ -56,9 +72,11 @@ export async function upsertProperty(_prev: FormState, formData: FormData): Prom
   if (id) {
     await supabaseAdmin.from("property_images").delete().eq("property_id", data.id);
     await supabaseAdmin.from("property_videos").delete().eq("property_id", data.id);
+    await supabaseAdmin.from("property_nearby_places").delete().eq("property_id", data.id);
   }
   const images = splitLines(image_urls).map((url, index) => ({ property_id: data.id, url, alt: property.title, sort_order: index }));
   const videos = splitLines(youtube_urls).map((youtube_url) => ({ property_id: data.id, youtube_url, title: property.title }));
+  const nearby = nearbyParsed.data.map((place, index) => ({ ...place, property_id: data.id, sort_order: index }));
   if (images.length) {
     const { error: imageError } = await supabaseAdmin.from("property_images").insert(images);
     if (imageError) return { status: "error", message: `Property saved, but the images failed: ${imageError.message}` };
@@ -66,6 +84,10 @@ export async function upsertProperty(_prev: FormState, formData: FormData): Prom
   if (videos.length) {
     const { error: videoError } = await supabaseAdmin.from("property_videos").insert(videos);
     if (videoError) return { status: "error", message: `Property saved, but the videos failed: ${videoError.message}` };
+  }
+  if (nearby.length) {
+    const { error: nearbyError } = await supabaseAdmin.from("property_nearby_places").insert(nearby);
+    if (nearbyError) return { status: "error", message: `Property saved, but nearby places failed: ${nearbyError.message}` };
   }
 
   revalidatePath("/");

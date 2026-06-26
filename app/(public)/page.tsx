@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Home, ShieldCheck, Star, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,10 +12,18 @@ import { getProperties } from "@/lib/data";
 export default async function HomePage() {
   const [featured, latest] = await Promise.all([getProperties({ featured: true, limit: 3 }), getProperties({ limit: 6 })]);
   const mapItems = latest.length ? latest : featured;
+  const featuredToShow = featured.length ? featured : latest.slice(0, 3);
   return (
     <main>
       <section className="relative min-h-[calc(100vh-4rem)] overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center" />
+        <Image
+          src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2000&auto=format&fit=crop"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent" />
         <div className="container relative flex min-h-[calc(100vh-4rem)] flex-col justify-center py-10 text-white sm:py-12">
           <div className="max-w-3xl">
@@ -31,7 +40,7 @@ export default async function HomePage() {
           <div><p className="text-sm uppercase tracking-[0.25em] text-primary">Featured</p><h2 className="mt-2 font-serif text-3xl font-semibold sm:text-4xl">Signature properties</h2></div>
           <Button asChild variant="outline"><Link href="/properties">View all <ArrowRight className="h-4 w-4" /></Link></Button>
         </div>
-        {featured.length ? <div className="grid gap-6 md:grid-cols-3">{featured.map((property) => <PropertyCard key={property.id} property={property} />)}</div> : <EmptyProperties />}
+        {featuredToShow.length ? <div className="grid gap-6 md:grid-cols-3">{featuredToShow.map((property) => <PropertyCard key={property.id} property={property} />)}</div> : <EmptyProperties />}
       </MotionSection>
 
       <MotionSection className="bg-card py-16">

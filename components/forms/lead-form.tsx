@@ -31,6 +31,8 @@ export function LeadForm({ propertyId }: { propertyId?: string }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
       <input type="hidden" {...register("property_id")} />
+      {/* Honeypot: hidden from users, only bots fill it. Submissions with it set are silently dropped. */}
+      <input type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" {...register("company")} />
       <div className="grid gap-2"><Label>Name</Label><Input {...register("name")} />{errors.name ? <p className="text-sm text-destructive">{errors.name.message}</p> : null}</div>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="grid gap-2"><Label>Email</Label><Input type="email" {...register("email")} />{errors.email ? <p className="text-sm text-destructive">{errors.email.message}</p> : null}</div>
