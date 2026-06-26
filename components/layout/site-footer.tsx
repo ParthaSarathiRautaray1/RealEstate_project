@@ -17,8 +17,10 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="text-sm text-muted-foreground">
-          <p className="font-semibold text-foreground">Deployment ready</p>
-          <p className="mt-3">Built for Vercel with Supabase, Cloudinary, Resend, and OpenStreetMap.</p>
+          <p className="flex items-center gap-2 font-semibold text-foreground">
+            <span className="font-serif text-2xl leading-none text-primary" aria-hidden="true">∞</span>
+            Developed by Partha
+          </p>
         </div>
       </div>
     </footer>
