@@ -15,6 +15,7 @@ export function SiteHeader() {
         </Link>
         <nav className="hidden items-center gap-7 text-sm text-muted-foreground md:flex">
           <Link href="/properties" className="transition-colors hover:text-foreground">Properties</Link>
+          <Link href="/aboutus" className="transition-colors hover:text-foreground">About Us</Link>
           <Link href="/#map" className="transition-colors hover:text-foreground">Map</Link>
           <Link href="/contact" className="transition-colors hover:text-foreground">Contact</Link>
         </nav>

@@ -4,6 +4,7 @@ import { Bath, BedDouble, Mail, Maximize, Phone, Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Gallery } from "@/components/property/gallery";
 import { LeadForm } from "@/components/forms/lead-form";
+import { ReviewForm } from "@/components/forms/review-form";
 import { PropertyCard } from "@/components/property/property-card";
 import { NearbyPlacesSection } from "@/components/property/nearby-places-section";
 import { DynamicPropertyMap } from "@/components/maps/dynamic-property-map";
@@ -96,7 +97,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
           {nearbyPlaces.length ? (
             <Card><CardContent className="p-4 sm:p-6"><NearbyPlacesSection property={{ latitude: property.latitude, longitude: property.longitude, title: property.title }} places={nearbyPlaces} /></CardContent></Card>
           ) : null}
-          <Card><CardContent className="p-4 sm:p-6"><h2 className="font-serif text-2xl font-semibold sm:text-3xl">Reviews</h2><div className="mt-4 grid gap-4">{reviews.length ? reviews.map((review) => <div key={review.id} className="border-b pb-4 last:border-0"><p className="safe-break flex items-center gap-2 font-semibold">{review.user_name} <span className="flex items-center gap-0.5" aria-label={`${review.rating} out of 5 stars`}>{Array.from({ length: 5 }).map((_, i) => <Star key={i} className={i < review.rating ? "h-3.5 w-3.5 fill-accent text-accent" : "h-3.5 w-3.5 text-muted-foreground/30"} />)}</span></p><p className="safe-break mt-1 text-sm text-muted-foreground">{review.review}</p></div>) : <p className="text-muted-foreground">No approved reviews yet.</p>}</div></CardContent></Card>
+          <Card><CardContent className="p-4 sm:p-6"><div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end"><div><p className="text-sm uppercase tracking-[0.22em] text-primary">Community proof</p><h2 className="mt-1 font-serif text-2xl font-semibold sm:text-3xl">Reviews</h2></div><p className="text-sm text-muted-foreground">Anyone can submit. Admin approval keeps quality high.</p></div><div className="mt-4 grid gap-4">{reviews.length ? reviews.map((review) => <div key={review.id} className="border-b pb-4 last:border-0"><p className="safe-break flex items-center gap-2 font-semibold">{review.user_name} <span className="flex items-center gap-0.5" aria-label={`${review.rating} out of 5 stars`}>{Array.from({ length: 5 }).map((_, i) => <Star key={i} className={i < review.rating ? "h-3.5 w-3.5 fill-accent text-accent" : "h-3.5 w-3.5 text-muted-foreground/30"} />)}</span></p><p className="safe-break mt-1 text-sm text-muted-foreground">{review.review}</p></div>) : <p className="text-muted-foreground">No approved reviews yet. Be the first to share a thoughtful note.</p>}</div><ReviewForm propertyId={property.id} /></CardContent></Card>
           {related.length ? <div><h2 className="mb-4 font-serif text-2xl font-semibold sm:text-3xl">Related properties</h2><div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">{related.map((item) => <PropertyCard key={item.id} property={item} />)}</div></div> : null}
         </div>
         <aside className="grid gap-6 self-start lg:sticky lg:top-24">

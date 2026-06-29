@@ -18,10 +18,45 @@ const serif = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Aurum Estates", template: "%s | Aurum Estates" },
-  description: "Luxury real estate lead generation and property showcase platform.",
+  title: { default: "Aurum Estates | Luxury Real Estate & Premium Property Tours", template: "%s | Aurum Estates" },
+  description: "Cinematic luxury real estate platform for premium homes, verified owners, property maps, reviews, and private showing inquiries.",
+  applicationName: "Aurum Estates",
+  authors: [{ name: "Aurum Estates" }],
+  creator: "Aurum Estates",
+  publisher: "Aurum Estates",
+  keywords: [
+    "Aurum Estates",
+    "luxury real estate",
+    "premium homes",
+    "luxury apartments",
+    "villas for sale",
+    "verified real estate owners",
+    "private property viewing",
+    "real estate lead generation"
+  ],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
-  openGraph: { title: "Aurum Estates", description: "Find premium homes, curated owners, reviews, and private showings.", type: "website" }
+  openGraph: {
+    title: "Aurum Estates | Luxury Real Estate",
+    description: "Find premium homes through cinematic galleries, verified owners, reviews, maps, and private showings.",
+    type: "website",
+    siteName: "Aurum Estates"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Aurum Estates | Luxury Real Estate",
+    description: "Premium homes, verified owners, private property tours, and cinematic discovery."
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1
+    }
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
